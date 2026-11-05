@@ -1,0 +1,59 @@
+name: E2E
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs on new commits for the same ref
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Checkout repository code
+      - uses: actions/checkout@v7
+
+      # Check if any Cypress test files exist before running the workflow
+      - name: Check that spec files exist
+        id: specs
+        run: |
+          count=$(find cypress/e2e -type f \( -name '*.cy.ts' -o -name '*.cy.js' \) 2>/dev/null | wc -l)
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          if [ "$count" -eq 0 ]; then
+            echo "::notice::No spec files found in cypress/e2e, Cypress run skipped"
+          else
+            echo "Found $count spec file(s)"
+          fi
+
+      # Setup Node.js environment
+      - uses: actions/setup-node@v7
+        if: steps.specs.outputs.count != '0'
+        with:
+          node-version-file: .nvmrc
+
+      # Run Cypress E2E tests in Chrome browser
+      - name: Cypress run
+        if: steps.specs.outputs.count != '0'
+        uses: cypress-io/github-action@v7.4.8
+        with:
+          browser: chrome
+          command: npm test
+
+      # Upload screenshots automatically only if tests fail
+      - name: Upload screenshots (failures only)
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+          retention-days: 2
