@@ -6,7 +6,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["cypress", "node"]
+    "types": ["cypress"]
   },
   "include": ["cypress/**/*.ts", "cypress.config.ts"]
 }
