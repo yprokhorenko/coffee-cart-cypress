@@ -38,7 +38,7 @@ jobs:
       - uses: actions/setup-node@v7
         if: steps.specs.outputs.count != '0'
         with:
-          node-version-file: .nvmrc
+          node-version: '20'
 
       # Run Cypress E2E tests in Chrome browser
       - name: Cypress run
