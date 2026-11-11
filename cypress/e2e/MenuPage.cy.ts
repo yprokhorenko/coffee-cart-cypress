@@ -3,7 +3,7 @@
  * @issue https://github.com/yprokhorenko/coffee-cart-cypress/issues/1
  */
 
-import { MenuPage } from "../support/pages/menuPage";
+import { MenuPage } from "../support/pages/MenuPage";
 import { Header } from "../support/pages/Header";
 import coffees from "../data/coffees";
 
