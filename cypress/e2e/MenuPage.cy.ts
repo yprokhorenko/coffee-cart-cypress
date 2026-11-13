@@ -17,7 +17,7 @@ describe("[TC-01] Menu shows every catalog coffee with its price", () => {
 
   it("GH-1: should show empty cart state ($0.00 and cart counter 0)", () => {
     menuPage.verifyEmptyCartState();
-    header.verifyCartCounter("cart (0)");
+    header.verifyCartCounter(0);
   });
 
   coffees.forEach((coffee) => {
