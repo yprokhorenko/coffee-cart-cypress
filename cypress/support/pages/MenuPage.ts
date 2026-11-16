@@ -3,7 +3,6 @@ import coffees from "../../data/coffees";
 export class MenuPage {
   private readonly coffeeCards = "ul > li:has(> h4):has([data-cy])";
   private readonly totalButton = '[data-test="checkout"]';
-  private readonly addToCartModal = '[data-cy="add-to-cart-modal"]';
 
   visit(): void {
     cy.visit("/");
@@ -24,23 +23,19 @@ export class MenuPage {
       this.verifyCoffeeVisibleWithPrice(coffee.name, coffee.price);
     });
   }
-  addCoffee(coffeeName: string): void {
-    cy.get(this.coffeeCards)
-      .filter((_, element) => {
-        const title = Cypress.$(element)
-          .find("h4")
-          .first()
-          .contents()
-          .first()
-          .text()
-          .trim();
 
-        return title === coffeeName;
-      })
-      .first()
+  addCoffee(coffeeName: string): void {
+    this.findCoffeeCard(coffeeName)
       .find("[data-cy]")
       .should("be.visible")
       .click();
+  }
+
+  rightClickCoffee(coffeeName: string): void {
+    this.findCoffeeCard(coffeeName)
+      .find("[data-cy]")
+      .should("be.visible")
+      .rightclick();
   }
 
   verifyTotal(expectedTotal: string): void {
@@ -48,8 +43,10 @@ export class MenuPage {
       .should("be.visible")
       .and("contain.text", expectedTotal);
   }
-  rightClickCoffee(coffeeName: string): void {
-    cy.get(this.coffeeCards)
+
+  private findCoffeeCard(coffeeName: string) {
+    return cy
+      .get(this.coffeeCards)
       .filter((_, element) => {
         const title = Cypress.$(element)
           .find("h4")
@@ -61,28 +58,6 @@ export class MenuPage {
 
         return title === coffeeName;
       })
-      .first()
-      .find("[data-cy]")
-      .should("be.visible")
-      .rightclick();
-  }
-  confirmAddToCart(coffeeName: string): void {
-    cy.get(this.addToCartModal)
-      .should("be.visible")
-      .and("contain.text", `Add ${coffeeName} to the cart?`)
-      .contains("button", "Yes")
-      .click();
-
-    cy.get(this.addToCartModal).should("not.be.visible");
-  }
-
-  declineAddToCart(coffeeName: string): void {
-    cy.get(this.addToCartModal)
-      .should("be.visible")
-      .and("contain.text", `Add ${coffeeName} to the cart?`)
-      .contains("button", "No")
-      .click();
-
-    cy.get(this.addToCartModal).should("not.be.visible");
+      .first();
   }
 }
