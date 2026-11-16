@@ -3,8 +3,7 @@
  * @issue https://github.com/yprokhorenko/coffee-cart-cypress/issues/2
  */
 
-import { MenuPage } from "../../support/pages/MenuPage";
-import { Header } from "../../support/pages/Header";
+import { Header, MenuPage } from "../../support";
 
 const menuPage = new MenuPage();
 const header = new Header();

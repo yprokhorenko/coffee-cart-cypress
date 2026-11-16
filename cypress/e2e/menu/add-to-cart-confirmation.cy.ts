@@ -3,9 +3,7 @@
  * @issue https://github.com/yprokhorenko/coffee-cart-cypress/issues/3
  */
 
-import { Header } from "../../support/pages/Header";
-import { MenuPage } from "../../support/pages/MenuPage";
-import { AddToCartModal } from "../../support/modals/add-to-cart-modal";
+import { AddToCartModal, Header, MenuPage } from "../../support";
 
 const menuPage = new MenuPage();
 const header = new Header();
