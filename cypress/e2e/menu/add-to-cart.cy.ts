@@ -3,7 +3,9 @@
  * @issue https://github.com/yprokhorenko/coffee-cart-cypress/issues/2
  */
 
+import coffees from "../../data/coffees";
 import { Header, MenuPage } from "../../support";
+import { cartLine, countItems, formatTotal } from "../../support/utils/cart";
 
 const menuPage = new MenuPage();
 const header = new Header();
@@ -13,26 +15,27 @@ describe("[TC-02] Adding a coffee updates the cart counter and total", () => {
     menuPage.visit();
   });
 
-  it("adds Espresso once and shows cart counter 1 and total $10.00", () => {
-    menuPage.addCoffee("Espresso");
+  it("adds Espresso once and updates the cart counter and total", () => {
+    const lines = [cartLine(coffees.espresso)];
 
-    header.verifyCartCounter(1);
-    menuPage.verifyTotal("$10.00");
+    menuPage.addCoffees(lines);
+    header.verifyCartCounter(countItems(lines));
+    menuPage.verifyTotal(formatTotal(lines));
   });
 
-  it("adds Espresso twice and shows cart counter 2 and total $20.00", () => {
-    menuPage.addCoffee("Espresso");
-    menuPage.addCoffee("Espresso");
+  it("adds Espresso twice and updates the cart counter and total", () => {
+    const lines = [cartLine(coffees.espresso, 2)];
 
-    header.verifyCartCounter(2);
-    menuPage.verifyTotal("$20.00");
+    menuPage.addCoffees(lines);
+    header.verifyCartCounter(countItems(lines));
+    menuPage.verifyTotal(formatTotal(lines));
   });
 
-  it("adds Espresso and Mocha and shows cart counter 2 and total $18.00", () => {
-    menuPage.addCoffee("Espresso");
-    menuPage.addCoffee("Mocha");
+  it("adds Espresso and Mocha and updates the cart counter and total", () => {
+    const lines = [cartLine(coffees.espresso), cartLine(coffees.mocha)];
 
-    header.verifyCartCounter(2);
-    menuPage.verifyTotal("$18.00");
+    menuPage.addCoffees(lines);
+    header.verifyCartCounter(countItems(lines));
+    menuPage.verifyTotal(formatTotal(lines));
   });
 });

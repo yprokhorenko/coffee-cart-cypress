@@ -19,9 +19,9 @@ describe("[TC-01] Menu shows every catalog coffee with its price", () => {
     header.verifyCartCounter(0);
   });
 
-  coffees.forEach((coffee) => {
+  Object.values(coffees).forEach((coffee) => {
     it(`GH-1: should display "${coffee.name}" with price ${coffee.price}`, () => {
-      menuPage.verifyCoffeeVisibleWithPrice(coffee.name, coffee.price);
+      menuPage.verifyCoffeeVisibleWithPrice(coffee);
     });
   });
 });

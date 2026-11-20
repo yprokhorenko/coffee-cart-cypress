@@ -3,7 +3,9 @@
  * @issue https://github.com/yprokhorenko/coffee-cart-cypress/issues/3
  */
 
+import coffees from "../../data/coffees";
 import { AddToCartModal, Header, MenuPage } from "../../support";
+import { cartLine, formatTotal } from "../../support/utils/cart";
 
 const menuPage = new MenuPage();
 const header = new Header();
@@ -17,16 +19,16 @@ describe("[TC-03] Adding a coffee via right click requires confirmation", () => 
   });
 
   it("adds Mocha after confirming", () => {
-    menuPage.rightClickCoffee("Mocha");
-    addToCartModal.accept("Mocha");
+    menuPage.rightClickCoffee(coffees.mocha);
+    addToCartModal.accept(coffees.mocha);
 
     header.verifyCartCounter(1);
-    menuPage.verifyTotal("$8.00");
+    menuPage.verifyTotal(formatTotal([cartLine(coffees.mocha)]));
   });
 
   it("does not add Mocha after declining", () => {
-    menuPage.rightClickCoffee("Mocha");
-    addToCartModal.decline("Mocha");
+    menuPage.rightClickCoffee(coffees.mocha);
+    addToCartModal.decline(coffees.mocha);
 
     header.verifyCartCounter(0);
     menuPage.verifyEmptyCartState();

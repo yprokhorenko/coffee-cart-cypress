@@ -1,7 +1,9 @@
-import coffees from "../../data/coffees";
+import type { Coffee } from "../../data/coffees";
+import type { CartLine } from "../utils/cart";
 
 export class MenuPage {
   private readonly coffeeCards = "ul > li:has(> h4):has([data-cy])";
+  // Total button of the cart preview on the menu page.
   private readonly totalButton = '[data-test="checkout"]';
 
   visit(): void {
@@ -9,42 +11,44 @@ export class MenuPage {
   }
 
   verifyEmptyCartState(): void {
-    cy.get(this.totalButton).should("contain.text", "$0.00");
+    this.verifyTotal("$0.00");
   }
-
-  verifyCoffeeVisibleWithPrice(coffeeName: string, price: string): void {
-    cy.contains(this.coffeeCards, coffeeName)
-      .should("be.visible")
-      .and("contain.text", price);
-  }
-
-  verifyAllCatalogItemsAreVisible(): void {
-    coffees.forEach((coffee) => {
-      this.verifyCoffeeVisibleWithPrice(coffee.name, coffee.price);
-    });
-  }
-
-  addCoffee(coffeeName: string): void {
-    this.findCoffeeCard(coffeeName)
-      .find("[data-cy]")
-      .should("be.visible")
-      .click();
-  }
-
-  rightClickCoffee(coffeeName: string): void {
-    this.findCoffeeCard(coffeeName)
-      .find("[data-cy]")
-      .should("be.visible")
-      .rightclick();
-  }
-
   verifyTotal(expectedTotal: string): void {
     cy.get(this.totalButton)
       .should("be.visible")
       .and("contain.text", expectedTotal);
   }
 
-  private findCoffeeCard(coffeeName: string) {
+  verifyCoffeeVisibleWithPrice(coffee: Coffee): void {
+    this.findCoffeeCard(coffee)
+      .should("be.visible")
+      .and("contain.text", coffee.price);
+  }
+
+  addCoffee(coffeeName: string): void {
+    this.coffeeButton(coffeeName).click();
+  }
+
+  rightClickCoffee(coffee: Coffee): void {
+    this.coffeeButton(coffee).rightclick();
+  }
+  /** Clicks each coffee `quantity` times, e.g. espresso x2 -> two clicks. */
+  addCoffees(lines: ReadonlyArray<CartLine>): void {
+    lines.forEach(({ coffee, quantity }) => {
+      for (let i = 0; i < quantity; i++) {
+        this.addCoffee(coffee);
+      }
+    });
+  }
+
+  private coffeeButton(coffee: Coffee): Cypress.Chainable<JQuery<HTMLElement>> {
+    return this.findCoffeeCard(coffee).find("[data-cy]").should("be.visible");
+  }
+
+  // Exact name match: cy.contains("Espresso") would also match "Espresso Macchiato".
+  private findCoffeeCard(
+    coffee: Coffee,
+  ): Cypress.Chainable<JQuery<HTMLElement>> {
     return cy
       .get(this.coffeeCards)
       .filter((_, element) => {
@@ -56,8 +60,8 @@ export class MenuPage {
           .text()
           .trim();
 
-        return title === coffeeName;
+        return title === coffee.name;
       })
-      .first();
+      .should("have.length", 1);
   }
 }
