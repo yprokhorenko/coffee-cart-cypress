@@ -4,7 +4,7 @@ import type { CartLine } from "../utils/cart";
 export class MenuPage {
   private readonly coffeeCards = "ul > li:has(> h4):has([data-cy])";
   // Total button of the cart preview on the menu page.
-  private readonly totalButton = '[data-test="checkout"]';
+  private readonly totalButton = 'button[data-test="checkout"]';
 
   visit(): void {
     cy.visit("/");
@@ -13,6 +13,7 @@ export class MenuPage {
   verifyEmptyCartState(): void {
     this.verifyTotal("$0.00");
   }
+
   verifyTotal(expectedTotal: string): void {
     cy.get(this.totalButton)
       .should("be.visible")
@@ -25,13 +26,14 @@ export class MenuPage {
       .and("contain.text", coffee.price);
   }
 
-  addCoffee(coffeeName: string): void {
-    this.coffeeButton(coffeeName).click();
+  addCoffee(coffee: Coffee): void {
+    this.coffeeButton(coffee).click();
   }
 
   rightClickCoffee(coffee: Coffee): void {
     this.coffeeButton(coffee).rightclick();
   }
+  
   /** Clicks each coffee `quantity` times, e.g. espresso x2 -> two clicks. */
   addCoffees(lines: ReadonlyArray<CartLine>): void {
     lines.forEach(({ coffee, quantity }) => {

@@ -1,18 +1,11 @@
-import type { Coffee } from "../../data/coffees";
-import { formatCents, toCents } from "../utils/money";
-
-/** One expected cart entry: a catalog coffee and how many times it was added. */
-export type CartLine = { coffee: Coffee; quantity: number };
+import { formatTotal, subtotalCents, type CartLine } from "../utils/cart";
+import { formatCents } from "../utils/money";
 
 /**
  * One cart row as rendered in the DOM, as plain trimmed text.
  * Shared shape for "expected" and "actual", so one deep-equality assertion fits.
  */
 type RenderedLine = { name: string; unitDesc: string; subtotal: string };
-
-// Work in cents (integers) to avoid floating-point errors.
-const subtotalCents = ({ coffee, quantity }: CartLine): number =>
-  toCents(coffee.price) * quantity;
 
 export class CartPage {
   private readonly root = "#app > .list";
@@ -60,59 +53,11 @@ export class CartPage {
     });
   }
 
-  verifyItems(items: ReadonlyArray<Coffee>): void {
-    cy.get(this.itemRows).should("have.length", items.length);
-
-    items.forEach((coffee) => {
-      this.verifyItem(coffee, 1);
-    });
-  }
-
-  verifyItem(coffee: Coffee, quantity: number): void {
-    const expectedSubtotal = formatCents(toCents(coffee.price) * quantity);
-
-    this.findItemByName(coffee.name).then(($row) => {
-      cy.wrap($row).should("be.visible");
-
-      cy.wrap($row).children("div").eq(0).should("have.text", coffee.name);
-
-      cy.wrap($row)
-        .children("div")
-        .eq(1)
-        .find(".unit-desc")
-        .should("be.visible")
-        .and("have.text", `${coffee.price} x ${quantity}`);
-
-      cy.wrap($row).children("div").eq(2).should("have.text", expectedSubtotal);
-    });
-  }
-
-  private findItemByName(name: string): Cypress.Chainable<JQuery<HTMLElement>> {
-    return cy
-      .get(this.itemRows)
-      .filter((_, element) => {
-        const itemName = Cypress.$(element)
-          .children("div")
-          .first()
-          .text()
-          .trim();
-
-        return itemName === name;
-      })
-      .should("have.length", 1);
-  }
-  verifyTotal(expectedTotal: string): void {
-    cy.get(this.totalButton)
-      .should("be.visible")
-      .and("contain.text", expectedTotal);
-  }
   /** Derives the expected total from the lines and checks the total button. */
   verifyTotalFor(lines: ReadonlyArray<CartLine>): void {
-    const cents = lines.reduce((sum, line) => sum + subtotalCents(line), 0);
-
     cy.get(this.totalButton)
       .should("be.visible")
-      .and("contain.text", formatCents(cents));
+      .and("contain.text", formatTotal(lines));
   }
 
   // Row layout: [name | "<price> x <qty>" | subtotal].

@@ -7,5 +7,6 @@ export default defineConfig({
      viewportHeight: 1080,
      video: false,
      retries: { runMode: 1, openMode: 0 },
+     supportFile: false,
   },
 });

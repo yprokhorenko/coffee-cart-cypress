@@ -1,21 +1,26 @@
 {
   "name": "coffee-cart-cypress",
   "version": "1.0.0",
+  "private": true,
   "description": "Automated E2E tests for coffee-cart.app using Cypress and TypeScript.",
   "main": "index.js",
+  "license": "ISC",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "test": "npm run cy:run"
+    "test": "npm run cy:run",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
   "devDependencies": {
-    "@badeball/cypress-cucumber-preprocessor": "^28.0.1",
-    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.8",
     "cypress": "^16.2.1",
-    "esbuild": "^0.28.2",
+    "prettier": "^3.10.1",
     "typescript": "^7.0.2"
   }
 }

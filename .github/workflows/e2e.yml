@@ -16,42 +16,28 @@ permissions:
 
 jobs:
   e2e:
+    name: Cypress
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      # Checkout repository code
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@v4
 
-      # Check if any Cypress test files exist before running the workflow
-      - name: Check that spec files exist
-        id: specs
-        run: |
-          count=$(find cypress/e2e -type f \( -name '*.cy.ts' -o -name '*.cy.js' \) 2>/dev/null | wc -l)
-          echo "count=$count" >> "$GITHUB_OUTPUT"
-          if [ "$count" -eq 0 ]; then
-            echo "::notice::No spec files found in cypress/e2e, Cypress run skipped"
-          else
-            echo "Found $count spec file(s)"
-          fi
-
-      # Setup Node.js environment
-      - uses: actions/setup-node@v7
-        if: steps.specs.outputs.count != '0'
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "24"
+          cache: npm
 
-      # Run Cypress E2E tests in Chrome browser
+      # Installs dependencies and runs `npm test` in Chrome
       - name: Cypress run
-        if: steps.specs.outputs.count != '0'
         uses: cypress-io/github-action@v7.4.8
         with:
           browser: chrome
           command: npm test
 
-      # Upload screenshots automatically only if tests fail
+      # Upload screenshots only if tests fail
       - name: Upload screenshots (failures only)
         if: failure()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
           path: cypress/screenshots

@@ -20,12 +20,6 @@ describe("[TC-04] Cart page shows the empty state and order contents", () => {
   });
 
   it("shows each added coffee with its quantity, subtotal, and correct total", () => {
-    menuPage.visit();
-    header.verifyCartCounter(0);
-    menuPage.verifyEmptyCartState();
-  });
-
-  it("shows each added coffee with its quantity, subtotal, and correct total", () => {
     const lines = [cartLine(coffees.espresso), cartLine(coffees.mocha)];
 
     // Preconditions (empty cart, counter) are covered by TC-01/TC-02,
