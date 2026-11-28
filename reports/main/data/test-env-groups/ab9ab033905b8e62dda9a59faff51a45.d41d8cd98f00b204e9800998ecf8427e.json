@@ -1,0 +1,1 @@
+{"id":"ab9ab033905b8e62dda9a59faff51a45.d41d8cd98f00b204e9800998ecf8427e","fullName":"coffee-cart-cypress:cypress/e2e/menu/add-to-cart-confirmation.cy.ts#[TC-03] Adding a coffee via right click requires confirmation does not add Mocha after declining","name":"does not add Mocha after declining","status":"passed","testResultsByEnv":{"default":"968520b1afb32801ff268f4265c72b9c"}}

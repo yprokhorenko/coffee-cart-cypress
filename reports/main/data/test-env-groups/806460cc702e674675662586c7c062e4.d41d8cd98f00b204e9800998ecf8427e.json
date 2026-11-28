@@ -1,0 +1,1 @@
+{"id":"806460cc702e674675662586c7c062e4.d41d8cd98f00b204e9800998ecf8427e","fullName":"coffee-cart-cypress:cypress/e2e/cart/cart-quantity.cy.ts#[TC-05] Cart quantity controls update totals and remove items removes all units with the delete button","name":"removes all units with the delete button","status":"passed","testResultsByEnv":{"default":"ed0de4b68aba578c646bd6661c429f05"}}
