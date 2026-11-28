@@ -11,14 +11,21 @@ concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true
 
+# Permissions for publishing reports to the gh-pages branch
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   e2e:
-    name: Cypress
+    name: Cypress and Allure
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    env:
+      # Directory for raw Allure results
+      ALLURE_RESULTS_DIR: allure-results
+      # Directory for the generated Allure HTML report
+      ALLURE_REPORT_DIR: allure-report
+
     steps:
       - uses: actions/checkout@v4
 
@@ -27,16 +34,99 @@ jobs:
           node-version: "24"
           cache: npm
 
-      # Installs dependencies and runs `npm test` in Chrome
+      # Install the project's dependencies
+      - name: Install project dependencies
+        run: npm ci
+
+      # >>> Added by Copilot: configure Allure for this workflow run temporarily
+      # Packages and configuration files do not permanently modify the repository.
+      - name: Configure Allure for this run
+        run: |
+          npm install --no-save --package-lock=false allure-cypress@^3.12.2 allure
+
+          cat > cypress.allure.config.ts <<'EOF'
+          import { defineConfig } from "cypress";
+          import { allureCypress } from "allure-cypress/reporter";
+          import baseConfig from "./cypress.config";
+
+          export default defineConfig({
+            ...baseConfig,
+            e2e: {
+              ...baseConfig.e2e,
+              supportFile: "cypress/support/allure.ts",
+              setupNodeEvents(on, config) {
+                allureCypress(on, config, {
+                  resultsDir: "allure-results",
+                });
+                return config;
+              },
+            },
+          });
+          EOF
+
+          printf '%s\n' 'import "allure-cypress";' > cypress/support/allure.ts
+
+      # >>> Added by Copilot: continue after Cypress failures
+      # This allows the workflow to generate and upload the Allure report.
       - name: Cypress run
+        id: cypress
+        continue-on-error: true
         uses: cypress-io/github-action@v7.4.8
         with:
+          install: false
           browser: chrome
-          command: npm test
+          command: npx cypress run --config-file cypress.allure.config.ts
 
-      # Upload screenshots only if tests fail
+      # >>> Added by Copilot: generate the Allure HTML report
+      - name: Generate Allure report
+        if: always() && steps.cypress.outcome != 'cancelled'
+        run: |
+          if [ -d "$ALLURE_RESULTS_DIR" ] && \
+             find "$ALLURE_RESULTS_DIR" -type f -name '*-result.json' -print -quit | grep -q .; then
+            npx allure generate "$ALLURE_RESULTS_DIR" \
+              --clean \
+              --output "$ALLURE_REPORT_DIR"
+          else
+            echo "Allure results were not generated; skipping HTML report."
+          fi
+
+      # >>> Added by Copilot: upload the Allure report as an artifact
+      # The artifact is available on the page for this Actions run.
+      - name: Upload Allure report
+        if: always() && steps.cypress.outcome != 'cancelled'
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-${{ github.run_number }}
+          path: allure-report
+          if-no-files-found: ignore
+          retention-days: 30
+
+      # >>> Added by Copilot: publish the report to a dedicated gh-pages directory
+      # Reports from fork pull requests remain available only as Actions artifacts.
+      - name: Publish Allure report to GitHub Pages
+        if: >-
+          always() &&
+          steps.cypress.outcome != 'cancelled' &&
+          hashFiles('allure-report/index.html') != '' &&
+          (github.event_name != 'pull_request' ||
+          github.event.pull_request.head.repo.full_name == github.repository)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./allure-report
+          destination_dir: reports/${{ github.event.pull_request.number && format('pr-{0}', github.event.pull_request.number) || 'main' }}
+          keep_files: true
+          commit_message: "docs: publish Allure report for run ${{ github.run_number }}"
+
+      # >>> Added by Copilot: fail the workflow if Cypress tests failed
+      - name: Fail workflow if Cypress tests failed
+        if: always() && steps.cypress.outcome == 'failure'
+        run: exit 1
+
+      # Upload screenshots when Cypress tests fail
       - name: Upload screenshots (failures only)
-        if: failure()
+        if: always() && steps.cypress.outcome == 'failure'
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
