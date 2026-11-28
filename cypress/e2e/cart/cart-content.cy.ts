@@ -4,10 +4,10 @@
  */
 
 import coffees from "../../data/coffees";
-import { CartPage, Header, MenuPage } from "../../support";
+import { CartPage, Header } from "../../support";
 import { cartLine } from "../../support/utils/cart";
+import { openCartWith } from "../../support/flows";
 
-const menuPage = new MenuPage();
 const cartPage = new CartPage();
 const header = new Header();
 
@@ -23,11 +23,8 @@ describe("[TC-04] Cart page shows the empty state and order contents", () => {
     const lines = [cartLine(coffees.espresso), cartLine(coffees.mocha)];
 
     // Preconditions (empty cart, counter) are covered by TC-01/TC-02,
-    // so they are intentionally not repeated here.
 
-    menuPage.visit();
-    menuPage.addCoffees(lines);
-    header.openCart();
+    openCartWith(lines);
 
     cartPage.verifyLines(lines);
     cartPage.verifyTotalFor(lines);
@@ -36,9 +33,7 @@ describe("[TC-04] Cart page shows the empty state and order contents", () => {
   it("merges repeated additions into one row with the right quantity and subtotal", () => {
     const lines = [cartLine(coffees.espresso, 2), cartLine(coffees.mocha)];
 
-    menuPage.visit();
-    menuPage.addCoffees(lines);
-    header.openCart();
+    openCartWith(lines);
 
     cartPage.verifyLines(lines);
     cartPage.verifyTotalFor(lines);
